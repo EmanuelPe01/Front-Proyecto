@@ -47,7 +47,7 @@ function Login() {
         e.preventDefault()
 
         if (handleSubmit) {
-            await axios.post('http://localhost:8080/auth/login', {
+            await axios.post('http://localhost:8080/api/auth/login', {
                 username: user,
                 password: pass
             }).then(function (response) {
