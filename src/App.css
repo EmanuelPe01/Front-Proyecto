@@ -37,9 +37,6 @@
   }
 }
 
-.centrar-div{
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  background: #61dafb;
+.container-body {
+  margin-top: 5rem;
 }
