@@ -1,65 +1,75 @@
 import React, { useEffect, useState } from "react";
-import NavBarProject from "./navBar";
-import axios from "axios";
-import Cookies from 'js-cookie';
-import { endpoint, validateFileType } from "../utils/endpoint";
-import { useNavigate } from 'react-router-dom'
-import { DeleteProblema, EditarProblema, AddSolucion } from "./buttons/actionsProblemas";
+import NavBarProject from "./navBar"; // Importar componente de barra de navegación
+import axios from "axios"; // Importar axios para manejar peticiones HTTP
+import Cookies from 'js-cookie'; // Importar Cookies de js-cookie para manejar cookies en el navegador
+import { endpoint, validateFileType } from "../utils/endpoint"; // Importar endpoint y validateFileType desde utils/endpoint
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate de react-router-dom para navegación
+import { DeleteProblema, EditarProblema, AddSolucion } from "./buttons/actionsProblemas"; // Importar componentes de botones para acciones en problemas
 
+// Función asíncrona para obtener todos los problemas desde el servidor
 const getAllProblems = async (token) => {
     const config = {
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Configurar encabezado de autorización con token JWT
         },
     };
 
     try {
+        // Realizar solicitud GET al endpoint del servidor para obtener problemas
         const response = await axios.get(`${endpoint}/problemas/getAll`, config);
-        return response.data;
+        return response.data; // Devolver datos recibidos del servidor
     } catch (error) {
+        // Manejar errores de respuesta del servidor
         if (error.response) {
             if (error.response.status === 401) {
+                // Manejar error de no autorizado (token inválido)
             } else {
-                console.error("Backend error:", error.response.data);
+                console.error("Backend error:", error.response.data); // Registrar error específico del backend en consola
             }
         }
-        throw error;
+        throw error; // Relanzar el error para manejo externo
     }
 };
 
-const ImgCard = ({urlResource}) => {
-    return(
+// Componente funcional para mostrar una imagen en una tarjeta
+const ImgCard = ({ urlResource }) => {
+    return (
         <img src={urlResource} className="img-fluid rounded-start" alt="..." />
     )
 }
 
-const VideoCard = ({urlResource}) => {
+// Componente funcional para mostrar un video en una tarjeta
+const VideoCard = ({ urlResource }) => {
     return (
-        <video src={urlResource} class="object-fit-contain" controls ></video>
+        <video src={urlResource} className="object-fit-contain" controls ></video>
     )
 }
 
-const AudioCard = ({urlResource}) => {
-    return(
+// Componente funcional para reproducir audio en una tarjeta
+const AudioCard = ({ urlResource }) => {
+    return (
         <div className="d-flex justify-content-center mt-5">
             <audio src={urlResource} controls ></audio>
         </div>
     )
 }
 
+// Componente funcional para renderizar la información de un problema en una tarjeta
 const CardProblem = ({ problema }) => {
-    const fileExtension = validateFileType(problema.recurso)
-    const urlResource = `${endpoint}/problemas/getResource/${problema.recurso}`
+    const fileExtension = validateFileType(problema.recurso); // Validar extensión del archivo del recurso
+    const urlResource = `${endpoint}/problemas/getResource/${problema.recurso}`; // Construir URL para obtener el recurso
+
     return (
         <div className="card mb-3">
             <div className="row g-0">
                 <div className="col-md-4">
+                    {/* Mostrar tarjeta específica según la extensión del archivo */}
                     {
-                        fileExtension === 'mp3' ? 
-                            <AudioCard urlResource={urlResource}/>
-                        : fileExtension === 'mp4' ? 
-                            <VideoCard urlResource={urlResource}/>
-                        :   <ImgCard urlResource={urlResource}/>
+                        fileExtension === 'mp3' ?
+                            <AudioCard urlResource={urlResource} /> :
+                            fileExtension === 'mp4' ?
+                                <VideoCard urlResource={urlResource} /> :
+                                <ImgCard urlResource={urlResource} />
                     }
                 </div>
                 <div className="col-md-8">
@@ -77,16 +87,16 @@ const CardProblem = ({ problema }) => {
                             <div className="col col-12">
                                 <div className="row align-items-end mt-5">
                                     <div className="col col-4">
-                                        <EditarProblema problema={problema}/>
-                                    </div>                                    
+                                        <EditarProblema problema={problema} /> {/* Botón para editar el problema */}
+                                    </div>
                                     <div className="col col-4">
-                                        <DeleteProblema idProblema={problema.id}/>
+                                        <DeleteProblema idProblema={problema.id} /> {/* Botón para eliminar el problema */}
                                     </div>
                                     <div className="col col-4">
                                         {
-                                            problema.solucion ? 
-                                            <AddSolucion idProblema={problema.solucion.id} accion="update" solucionActual={problema.solucion.solucion}/> :
-                                            <AddSolucion idProblema={problema.id}/>
+                                            problema.solucion ?
+                                                <AddSolucion idProblema={problema.solucion.id} accion="update" solucionActual={problema.solucion.solucion} /> :
+                                                <AddSolucion idProblema={problema.id} /> // Botón para agregar solución al problema
                                         }
                                     </div>
                                 </div>
@@ -99,30 +109,36 @@ const CardProblem = ({ problema }) => {
     )
 }
 
+// Componente principal para la página de reportes
 function Reportes() {
-    const [problemas, setProblemas] = useState([]);
-    const [token, setToken] = useState('');
-    const navigate = useNavigate();
+    const [problemas, setProblemas] = useState([]); // Estado para almacenar problemas obtenidos del servidor
+    const [token, setToken] = useState(''); // Estado para almacenar el token de autenticación
+    const navigate = useNavigate(); // Hook de react-router-dom para navegación
 
     useEffect(() => {
-        const loggedUser = Cookies.get('jwt');
+        const loggedUser = Cookies.get('jwt'); // Obtener token JWT almacenado en las cookies del navegador
         if (loggedUser) {
-            setToken(loggedUser);
+            setToken(loggedUser); // Almacenar el token en el estado
+            // Llamar a la función asíncrona para obtener todos los problemas
             getAllProblems(token).then((data) => {
-                setProblemas(data)
-            })
+                setProblemas(data); // Actualizar el estado con los problemas obtenidos
+            }).catch((error) => {
+                console.error("Error fetching problems:", error); // Manejar errores al obtener problemas
+            });
         }
-    }, [token]);
+    }, [token]); // Ejecutar efecto cuando cambia el token
 
+    // Función para renderizar la pantalla de reportes
     const renderScreen = () => {
         return (
             <>
-                <NavBarProject />
+                <NavBarProject /> {/* Componente de barra de navegación */}
                 <div className="container container-body">
                     <div className="row">
+                        {/* Mapear y renderizar cada problema en la lista de problemas */}
                         {problemas.map((problema) => (
                             <div className="col col-12" key={problema.id}>
-                                <CardProblem problema={problema} />
+                                <CardProblem problema={problema} /> {/* Componente de tarjeta para cada problema */}
                             </div>
                         ))}
                     </div>
@@ -131,9 +147,10 @@ function Reportes() {
         )
     }
 
+    // Retornar componente condicionalmente basado en la existencia del token
     return (
-        <>{token ? renderScreen() : navigate('../')}</>
+        <>{token ? renderScreen() : navigate('../')}</> // Redireccionar si no hay token válido
     );
 }
 
-export default Reportes;
+export default Reportes; // Exportar componente Reportes para su uso en otros archivos

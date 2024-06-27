@@ -1,77 +1,87 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from 'react-router-dom'
-import axios from "axios";
-import Cookies from 'js-cookie';
-import { Card, Form, Button } from "react-bootstrap";
-import Swal from "sweetalert2";
+import { useNavigate, Link } from 'react-router-dom'; // Importar useNavigate y Link de react-router-dom para navegación
+import axios from "axios"; // Importar axios para realizar peticiones HTTP
+import Cookies from 'js-cookie'; // Importar Cookies de js-cookie para manejar cookies en el navegador
+import { Card, Form, Button } from "react-bootstrap"; // Importar componentes de React Bootstrap
+import Swal from "sweetalert2"; // Importar SweetAlert2 para mostrar alertas visuales
 
+// Función para mostrar una alerta de error
 function ErrorAlert() {
     Swal.fire({
         title: '¡Error!',
         text: 'Credenciales inválidas',
         icon: 'error',
         confirmButtonText: 'Aceptar'
-    })
+    });
 }
 
+// Función para mostrar una alerta de éxito
 function OkAlert() {
     Swal.fire({
         title: '¡Inicio de sesión exitoso!',
         icon: 'success',
-        timer: 1600
-    })
+        timer: 1600 // Tiempo en milisegundos para cerrar automáticamente la alerta
+    });
 }
 
+// Componente funcional para la página de inicio de sesión
 function Login() {
-    const [validated, setValidated] = useState(false);
-    const [user, setUser] = useState('');
-    const [pass, setPass] = useState('');
-    const [token, setToken] = useState(null);
-    const navigate = useNavigate();
+    const [validated, setValidated] = useState(false); // Estado para validar el formulario
+    const [user, setUser] = useState(''); // Estado para el nombre de usuario
+    const [pass, setPass] = useState(''); // Estado para la contraseña
+    const [token, setToken] = useState(null); // Estado para el token de sesión
+    const navigate = useNavigate(); // Hook de react-router-dom para navegación
 
+    // Efecto para verificar si hay un usuario autenticado al cargar el componente
     useEffect(() => {
-        const loggedUser = Cookies.get('jwt');
+        const loggedUser = Cookies.get('jwt'); // Obtener el token de sesión almacenado en cookies
         if (loggedUser) {
-            setToken(loggedUser);
+            setToken(loggedUser); // Establecer el token en el estado si existe
         }
     }, []);
 
+    // Estilo personalizado para el botón de inicio de sesión
     const buttonStyle = {
-        '--bs-btn-hover-color': '#000',
-        '--bs-btn-hover-bg': '#fff'
-    }
+        '--bs-btn-hover-color': '#000', // Color de texto al pasar el cursor sobre el botón
+        '--bs-btn-hover-bg': '#fff' // Color de fondo al pasar el cursor sobre el botón
+    };
 
+    // Función para manejar el envío del formulario de inicio de sesión
     const handleSubmit = async (event) => {
         const form = event.currentTarget;
-        event.preventDefault();
-        event.stopPropagation();
+        event.preventDefault(); // Evitar comportamiento por defecto del evento submit
+        event.stopPropagation(); // Detener la propagación del evento
 
-        setValidated(true);
+        setValidated(true); // Marcar el formulario como validado
 
+        // Verificar si el formulario es válido
         if (form.checkValidity() === false) {
             return;
         }
 
         try {
+            // Realizar petición POST al endpoint de autenticación con los datos de usuario y contraseña
             const response = await axios.post('http://localhost:8080/auth/login', {
                 username: user,
                 password: pass
             });
 
-            OkAlert();
-            Cookies.set('jwt', response.data.token);
-            setToken(response.data.token);
-            navigate('/reportes');
+            OkAlert(); // Mostrar alerta de inicio de sesión exitoso
+            Cookies.set('jwt', response.data.token); // Almacenar el token de sesión en cookies
+            setToken(response.data.token); // Establecer el token en el estado
+            navigate('/reportes'); // Redireccionar al usuario a la página de reportes después del inicio de sesión
         } catch (error) {
             console.error('Error:', error);
+            // Verificar si se recibió una respuesta de error de autenticación (401 Unauthorized)
             if (error.response && error.response.status === 401) {
-                ErrorAlert();
+                ErrorAlert(); // Mostrar alerta de credenciales inválidas
             } else {
-                console.error('Unknown error occurred.');
+                console.error('Unknown error occurred.'); // Mostrar mensaje de error desconocido en la consola
             }
         }
     };
 
+    // Función para renderizar el formulario de inicio de sesión
     const renderLogin = () => {
         return (
             <div className="container">
@@ -105,11 +115,13 @@ function Login() {
                                     </Form.Group>
                                     <div className="row align-items-center text-center">
                                         <div className="col col-6">
+                                            {/* Enlace para redirigir a la página de registro */}
                                             <Link to='/signIn' className="link-body-emphasis link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover">
                                                 <p>¿No tienes cuenta?</p>
                                             </Link>
                                         </div>
                                         <div className="col col-6">
+                                            {/* Botón de inicio de sesión con estilo personalizado */}
                                             <Button style={buttonStyle} className="mt-3" variant="success" type="submit">
                                                 Iniciar sesión
                                             </Button>
@@ -125,10 +137,11 @@ function Login() {
     };
 
     return (
+        // Renderizar la página de reportes si hay un token válido, de lo contrario, renderizar el formulario de inicio de sesión
         <span>
             {token ? navigate('/reportes') : renderLogin()}
         </span>
     );
 }
 
-export default Login;
+export default Login; // Exportar el componente Login para su uso en otras partes de la aplicación
