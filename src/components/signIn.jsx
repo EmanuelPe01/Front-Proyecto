@@ -46,15 +46,17 @@ function SignIn() {
     };
 
     const register = async (e) => {
+        console.log('entre')
         e.preventDefault()
 
         if (handleSubmit) {
-            await axios.post('http://localhost:8080/auth/register', {
+            const userInfo = {
                 username: user,
                 password: pass,
-                firstName: firstName,
-                lastName: lastName
-            }).then(function (response) {
+                firstname: firstName,
+                lastname: lastName
+            }
+            await axios.post('http://localhost:8080/auth/register', userInfo).then(function (response) {
                 OkAlert();
                 navigate('/')
             }).catch(function (error) {

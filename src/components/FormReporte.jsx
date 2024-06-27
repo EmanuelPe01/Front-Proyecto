@@ -10,24 +10,24 @@ import Swal from "sweetalert2";
 
 function ErrorAlert(title) {
   Swal.fire({
-      title: title,
-      text: 'Credenciales inválidas',
-      icon: 'error',
-      confirmButtonText: 'Aceptar'
+    title: title,
+    text: 'Credenciales inválidas',
+    icon: 'error',
+    confirmButtonText: 'Aceptar'
   })
 }
 
 function OkAlert(title) {
   Swal.fire({
-      title: title,
-      icon: 'success',
-      timer: 1600
+    title: title,
+    icon: 'success',
+    timer: 1600
   })
 }
 
-const ReportForm = ({token}) => {
+const ReportForm = ({ token }) => {
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState(null);
+  const [recurso, setRecurso] = useState(null);
   const navigate = useNavigate();
 
   const { coords, isGeolocationAvailable, isGeolocationEnabled } = useGeolocated({
@@ -41,14 +41,14 @@ const ReportForm = ({token}) => {
     setDescription(event.target.value);
   };
 
-  const handleImageChange = (event) => {
+  const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const maxSizeInBytes = 1048576;
+      const maxSizeInBytes = 10 * 1024 * 1024;;
       if (file.size > maxSizeInBytes) {
-        alert('La imagen debe ser menor o igual a 1 MB.');
+        alert('El recurso debe ser menor o igual a 10 MB.');
       } else {
-        setImage(file);
+        setRecurso(file);
       }
     }
   };
@@ -61,19 +61,15 @@ const ReportForm = ({token}) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!description || !image || !coords) {
+    if (!description || !recurso || !coords) {
       alert('Por favor llene todos los campos y permita la geolocalizacion.');
       return;
     }
 
     const formData = new FormData();
     formData.append('descripcion', description);
-    formData.append('foto', image);
+    formData.append('recurso', recurso);
     formData.append('ubicacion', `${coords.latitude}, ${coords.longitude}`);
-
-    console.log('Description:', description);
-    console.log('Image:', image);
-    console.log('Coordinates:', coords);
 
     try {
       const response = await axios.post(`${endpoint}/problemas/add`, formData, config);
@@ -95,7 +91,7 @@ const ReportForm = ({token}) => {
     <>
       <NavBarProject />
       <div className="container container-body">
-        <h1 className="mb-4">Reportar desperfecto tecnico</h1>
+        <h1 className="mb-4">Reportar desperfecto técnico</h1>
         <form onSubmit={handleSubmit}>
 
           <div className="mb-3">
@@ -109,30 +105,30 @@ const ReportForm = ({token}) => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="image" className="form-label">Subir fotografia</label>
+            <label htmlFor="recurso" className="form-label">Subir evidencia (Foto, vídeo o audio)</label>
             <input
               type="file"
-              id="image"
+              id="file"
               className="form-control"
-              accept="image/png"
-              capture="environment"
-              onChange={handleImageChange}
-              required />
+              accept=".mp3, .mp4, .jpg, .png"
+              onChange={handleFileChange}
+              required
+            />
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Datos de geolocalizacion </label>
+            <label className="form-label">Datos de geolocalización </label>
             {!isGeolocationAvailable ? (
-              <div>Tu navegador no soporta geolocalizacion</div>
+              <div>Tu navegador no soporta geolocalización</div>
             ) : !isGeolocationEnabled ? (
-              <div>La geolocalizacion no esta permitida</div>
+              <div>La geolocalización no esta permitida</div>
             ) : coords ? (
               <div>
                 <p>Latitud: {coords.latitude}</p>
                 <p>Longitud: {coords.longitude}</p>
               </div>
             ) : (
-              <div>Obteniendo datos de locacalizacion&hellip; </div>
+              <div>Obteniendo datos de locacalización&hellip; </div>
             )}
           </div>
           <button type="submit" className="btn btn-primary">Enviar reporte</button>
@@ -152,9 +148,9 @@ function FormReporteScreen() {
       setToken(loggedUser);
     }
   }, [token]);
-  return(
+  return (
     <>
-    {token? <ReportForm token={token} /> : navigate('../..')}
+      {token ? <ReportForm token={token} /> : navigate('../..')}
     </>
   )
 }
