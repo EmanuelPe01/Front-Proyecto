@@ -39,9 +39,9 @@ const ImgCard = ({ urlResource }) => {
 }
 
 // Componente funcional para mostrar un video en una tarjeta
-const VideoCard = ({ urlResource }) => {
+const VideoCard = ({ urlResource, width = "400px", height = "250px" }) => {
     return (
-        <video src={urlResource} className="object-fit-contain" controls ></video>
+        <video src={urlResource} width={width} height={height} className="object-fit-cover" controls ></video>
     )
 }
 
@@ -58,7 +58,6 @@ const AudioCard = ({ urlResource }) => {
 const CardProblem = ({ problema }) => {
     const fileExtension = validateFileType(problema.recurso); // Validar extensión del archivo del recurso
     const urlResource = `${endpoint}/problemas/getResource/${problema.recurso}`; // Construir URL para obtener el recurso
-
     return (
         <div className="card mb-3">
             <div className="row g-0">

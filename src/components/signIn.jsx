@@ -39,7 +39,7 @@ function SignIn() {
     }
 
     // Función que maneja el envío del formulario
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         const form = event.currentTarget;
         if (form.checkValidity() === false) {
             event.preventDefault();
@@ -47,7 +47,7 @@ function SignIn() {
         }
 
         setValidated(true);
-        if (validated) register(event); // Llama a la función de registro si el formulario está validado
+        if (validated) await register(event); // Llama a la función de registro si el formulario está validado
     };
 
     // Función asíncrona para registrar un nuevo usuario
@@ -64,13 +64,14 @@ function SignIn() {
 
         try {
             // Enviar la solicitud POST al servidor para registrar al usuario
-            await axios.post('http://localhost:8080/auth/register', userInfo);
+            await axios.post('http://localhost:8080/auth/register', userInfo).then(function () {
+                // Mostrar una alerta de registro exitoso
+                OkAlert();
 
-            // Mostrar una alerta de registro exitoso
-            OkAlert();
+                // Navegar al inicio después de registrar exitosamente
+                navigate('/');
+            });
 
-            // Navegar al inicio después de registrar exitosamente
-            navigate('/');
         } catch (error) {
             // Manejar errores de respuesta del servidor
             if (error.response && error.response.status) {
@@ -147,7 +148,7 @@ function SignIn() {
                                     {/* Botón para enviar el formulario de registro */}
                                     <div className="col col-6">
                                         <Button style={buttonStyle} className="mt-3" variant="success" type="submit">
-                                            Iniciar sesión
+                                            Registrarse
                                         </Button>
                                     </div>
                                 </div>
